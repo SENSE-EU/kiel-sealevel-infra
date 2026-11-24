@@ -1,0 +1,33 @@
+
+{
+    email {$ACME_EMAIL}
+}
+
+### STAGING
+
+staging.example.com {
+    encode zstd gzip
+
+    reverse_proxy frontend-staging:8080
+}
+
+api-staging.example.com {
+    encode zstd gzip
+
+    reverse_proxy cms-staging:1337
+}
+
+### PRE-PRODUCTION
+
+preprod.example.com {
+    encode zstd gzip
+
+    reverse_proxy frontend-preprod:8080
+}
+
+api-preprod.example.com {
+    encode zstd gzip
+
+    reverse_proxy cms-preprod:1337
+}
+

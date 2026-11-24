@@ -1,0 +1,40 @@
+services:
+
+### STAGING WATCHTOWER
+
+  watchtower-staging:
+    image: containrrr/watchtower:1.7.1
+    container_name: watchtower-staging
+    restart: unless-stopped
+
+    command:
+      - --scope
+      - staging
+      - --label-enable
+      - --interval
+      - "60"
+      - --cleanup
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_CONFIG_FILE}:/config.json:ro
+
+### PRE-PRODUCTION WATCHTOWER
+
+  watchtower-preprod:
+    image: containrrr/watchtower:1.7.1
+    container_name: watchtower-preprod
+    restart: unless-stopped
+
+    command:
+      - --scope
+      - preprod
+      - --label-enable
+      - --interval
+      - "60"
+      - --cleanup
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_CONFIG_FILE}:/config.json:ro
+

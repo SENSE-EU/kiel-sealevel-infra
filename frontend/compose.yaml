@@ -1,0 +1,47 @@
+services:
+
+### STAGING FRONTEND
+
+  frontend-staging:
+    image: ghcr.io/${GHCR_OWNER}/${FRONTEND_IMAGE}:${STAGING_FE_TAG}
+    container_name: frontend-staging
+    restart: unless-stopped
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=staging"
+
+    networks:
+      - staging_proxy
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1:8080/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+### PRE-PROD FRONTEND
+
+  frontend-preprod:
+    image: ghcr.io/${GHCR_OWNER}/${FRONTEND_IMAGE}:${PREPROD_FE_TAG}
+    container_name: frontend-preprod
+    restart: unless-stopped
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=preprod"
+
+    networks:
+      - preprod_proxy
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1:8080/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

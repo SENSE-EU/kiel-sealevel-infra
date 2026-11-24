@@ -1,0 +1,157 @@
+services:
+
+### STAGING POSTGRES
+
+  postgres-staging:
+    image: postgres:17
+    container_name: postgres-staging
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${STAGING_DB_NAME}
+      POSTGRES_USER: ${STAGING_DB_USER}
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD}
+
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - staging_internal
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+### PRE-PROD POSTGRES
+
+  postgres-preprod:
+    image: postgres:17
+    container_name: postgres-preprod
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${PREPROD_DB_NAME}
+      POSTGRES_USER: ${PREPROD_DB_USER}
+      POSTGRES_PASSWORD: ${PREPROD_DB_PASSWORD}
+
+    volumes:
+      - preprod_postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - preprod_internal
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+### STAGING CMS
+
+  cms-staging:
+    image: ghcr.io/${GHCR_OWNER}/${CMS_IMAGE}:${STAGING_CMS_TAG}
+    container_name: cms-staging
+    restart: unless-stopped
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=staging"
+
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres-staging
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${STAGING_DB_NAME}
+      DATABASE_USERNAME: ${STAGING_DB_USER}
+      DATABASE_PASSWORD: ${STAGING_DB_PASSWORD}
+      DATABASE_SSL: "false"
+
+      APP_KEYS: ${STAGING_APP_KEYS}
+      API_TOKEN_SALT: ${STAGING_API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${STAGING_ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${STAGING_TRANSFER_TOKEN_SALT}
+      JWT_SECRET: ${STAGING_JWT_SECRET}
+
+    volumes:
+      - staging_cms_uploads:/opt/app/public/uploads
+
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+
+    networks:
+      - staging_proxy
+      - staging_internal
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:1337/admin').then(r => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+### PRE-PROD CMS
+
+  cms-preprod:
+    image: ghcr.io/${GHCR_OWNER}/${CMS_IMAGE}:${PREPROD_CMS_TAG}
+    container_name: cms-preprod
+    restart: unless-stopped
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=preprod"
+
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres-preprod
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${PREPROD_DB_NAME}
+      DATABASE_USERNAME: ${PREPROD_DB_USER}
+      DATABASE_PASSWORD: ${PREPROD_DB_PASSWORD}
+      DATABASE_SSL: "false"
+
+      APP_KEYS: ${PREPROD_APP_KEYS}
+      API_TOKEN_SALT: ${PREPROD_API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${PREPROD_ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${PREPROD_TRANSFER_TOKEN_SALT}
+      JWT_SECRET: ${PREPROD_JWT_SECRET}
+
+    volumes:
+      - preprod_cms_uploads:/opt/app/public/uploads
+
+    depends_on:
+      postgres-preprod:
+        condition: service_healthy
+
+    networks:
+      - preprod_proxy
+      - preprod_internal
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:1337/admin').then(r => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

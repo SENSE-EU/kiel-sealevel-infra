@@ -1,0 +1,30 @@
+name: myapp
+
+networks:
+  staging_proxy:
+    name: myapp_staging_proxy
+    driver: bridge
+
+  preprod_proxy:
+    name: myapp_preprod_proxy
+    driver: bridge
+
+  staging_internal:
+    name: myapp_staging_internal
+    driver: bridge
+    internal: true
+
+  preprod_internal:
+    name: myapp_preprod_internal
+    driver: bridge
+    internal: true
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+  staging_postgres_data:
+  preprod_postgres_data:
+
+  staging_cms_uploads:
+  preprod_cms_uploads:
