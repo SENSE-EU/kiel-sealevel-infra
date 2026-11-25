@@ -1,0 +1,6 @@
+##### List of files that should not live in Git
+
+# List of secrets used by Compose containers
+
+.env
+
