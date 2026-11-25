@@ -1,9 +1,10 @@
+
 services:
 
 ### STAGING FRONTEND
 
   frontend-staging:
-    image: ghcr.io/${GHCR_OWNER}/${FRONTEND_IMAGE}:${STAGING_FE_TAG}
+    image: ${ACR_REGISTRY}/${FRONTEND_IMAGE}:${STAGING_FE_TAG}
     container_name: frontend-staging
     restart: unless-stopped
 
@@ -23,10 +24,11 @@ services:
       retries: 3
       start_period: 10s
 
+
 ### PRE-PROD FRONTEND
 
   frontend-preprod:
-    image: ghcr.io/${GHCR_OWNER}/${FRONTEND_IMAGE}:${PREPROD_FE_TAG}
+    image: ${ACR_REGISTRY}/${FRONTEND_IMAGE}:${PREPROD_FE_TAG}
     container_name: frontend-preprod
     restart: unless-stopped
 
@@ -45,3 +47,14 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+
+networks:
+  staging_proxy:
+    external: true
+    name: kiel-sealevel_staging_proxy
+
+  preprod_proxy:
+    external: true
+    name: kiel-sealevel_preprod_proxy
+

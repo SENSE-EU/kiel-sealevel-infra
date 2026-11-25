@@ -1,3 +1,4 @@
+
 services:
 
 ### STAGING POSTGRES
@@ -26,6 +27,7 @@ services:
       timeout: 5s
       retries: 5
 
+
 ### PRE-PROD POSTGRES
 
   postgres-preprod:
@@ -52,10 +54,11 @@ services:
       timeout: 5s
       retries: 5
 
+
 ### STAGING CMS
 
   cms-staging:
-    image: ghcr.io/${GHCR_OWNER}/${CMS_IMAGE}:${STAGING_CMS_TAG}
+    image: ${ACR_REGISTRY}/${CMS_IMAGE}:${STAGING_CMS_TAG}
     container_name: cms-staging
     restart: unless-stopped
 
@@ -64,23 +67,27 @@ services:
       - "com.centurylinklabs.watchtower.scope=staging"
 
     environment:
-      NODE_ENV: production
-      HOST: 0.0.0.0
-      PORT: 1337
+      NODE_ENV: ${NODE_ENV}
+      HOST: ${HOST}
+      PORT: ${PORT}
 
-      DATABASE_CLIENT: postgres
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
       DATABASE_HOST: postgres-staging
-      DATABASE_PORT: 5432
+      DATABASE_PORT: ${DATABASE_PORT}
       DATABASE_NAME: ${STAGING_DB_NAME}
       DATABASE_USERNAME: ${STAGING_DB_USER}
       DATABASE_PASSWORD: ${STAGING_DB_PASSWORD}
-      DATABASE_SSL: "false"
+      DATABASE_SSL: "${DATABASE_SSL}"
 
       APP_KEYS: ${STAGING_APP_KEYS}
       API_TOKEN_SALT: ${STAGING_API_TOKEN_SALT}
       ADMIN_JWT_SECRET: ${STAGING_ADMIN_JWT_SECRET}
       TRANSFER_TOKEN_SALT: ${STAGING_TRANSFER_TOKEN_SALT}
       JWT_SECRET: ${STAGING_JWT_SECRET}
+      ENCRYPTION_KEY: ${STAGING_ENCRYPTION_KEY}
+
+      PUBLIC_URL: ${STAGING_PUBLIC_URL}
+      IS_PROXIED: "${IS_PROXIED}"
 
     volumes:
       - staging_cms_uploads:/opt/app/public/uploads
@@ -104,10 +111,11 @@ services:
       retries: 3
       start_period: 60s
 
-### PRE-PROD CMS
 
+### PRE-PROD CMS
+  
   cms-preprod:
-    image: ghcr.io/${GHCR_OWNER}/${CMS_IMAGE}:${PREPROD_CMS_TAG}
+    image: ${ACR_REGISTRY}/${CMS_IMAGE}:${PREPROD_CMS_TAG}
     container_name: cms-preprod
     restart: unless-stopped
 
@@ -116,23 +124,27 @@ services:
       - "com.centurylinklabs.watchtower.scope=preprod"
 
     environment:
-      NODE_ENV: production
-      HOST: 0.0.0.0
-      PORT: 1337
+      NODE_ENV: ${NODE_ENV}
+      HOST: ${HOST}
+      PORT: ${PORT}
 
-      DATABASE_CLIENT: postgres
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
       DATABASE_HOST: postgres-preprod
-      DATABASE_PORT: 5432
+      DATABASE_PORT: ${DATABASE_PORT}
       DATABASE_NAME: ${PREPROD_DB_NAME}
       DATABASE_USERNAME: ${PREPROD_DB_USER}
       DATABASE_PASSWORD: ${PREPROD_DB_PASSWORD}
-      DATABASE_SSL: "false"
+      DATABASE_SSL: "${DATABASE_SSL}"
 
       APP_KEYS: ${PREPROD_APP_KEYS}
       API_TOKEN_SALT: ${PREPROD_API_TOKEN_SALT}
       ADMIN_JWT_SECRET: ${PREPROD_ADMIN_JWT_SECRET}
       TRANSFER_TOKEN_SALT: ${PREPROD_TRANSFER_TOKEN_SALT}
       JWT_SECRET: ${PREPROD_JWT_SECRET}
+      ENCRYPTION_KEY: ${PREPROD_ENCRYPTION_KEY}
+
+      PUBLIC_URL: ${PREPROD_PUBLIC_URL}
+      IS_PROXIED: "${IS_PROXIED}"
 
     volumes:
       - preprod_cms_uploads:/opt/app/public/uploads
@@ -155,3 +167,36 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+
+volumes:
+  staging_postgres_data:
+    name: kiel-sealevel_staging_postgres_data
+
+  preprod_postgres_data:
+    name: kiel-sealevel_preprod_postgres_data
+
+  staging_cms_uploads:
+    name: kiel-sealevel_staging_cms_uploads
+
+  preprod_cms_uploads:
+    name: kiel-sealevel_preprod_cms_uploads
+
+
+networks:
+  staging_proxy:
+    external: true
+    name: kiel-sealevel_staging_proxy
+
+  preprod_proxy:
+    external: true
+    name: kiel-sealevel_preprod_proxy
+
+  staging_internal:
+    external: true
+    name: kiel-sealevel_staging_internal
+
+  preprod_internal:
+    external: true
+    name: kiel-sealevel_preprod_internal
+
