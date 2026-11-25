@@ -1,33 +1,54 @@
-
 {
-    email {$ACME_EMAIL}
+    email alexandru.dobrescu@dreso.com
 }
 
-### STAGING
+### PRE-PRODUCTION - HTTPS 443
 
-staging.example.com {
-    encode zstd gzip
+kiel-sealevel.westeurope.cloudapp.azure.com {
 
-    reverse_proxy frontend-staging:8080
+    # Strapi API endpoint
+    handle /api /api/* {
+        reverse_proxy cms-preprod:1337
+    }
+
+    # Strapi uploads endpoint
+    handle /uploads /uploads/* {
+        reverse_proxy cms-preprod:1337
+    }
+
+    # Strapi administration endpoint
+    handle /admin /admin/* {
+        reverse_proxy cms-preprod:1337
+    }
+
+    # Frontend - default route
+    handle {
+        reverse_proxy frontend-preprod:8080
+    }
 }
 
-api-staging.example.com {
-    encode zstd gzip
+### STAGING - HTTPS 8443
 
-    reverse_proxy cms-staging:1337
-}
+kiel-sealevel.westeurope.cloudapp.azure.com:8443 {
 
-### PRE-PRODUCTION
+    # Strapi API endpoint
+    handle /api /api/* {
+        reverse_proxy cms-staging:1337
+    }
 
-preprod.example.com {
-    encode zstd gzip
+    # Strapi uploads endpoint
+    handle /uploads /uploads/* {
+        reverse_proxy cms-staging:1337
+    }
 
-    reverse_proxy frontend-preprod:8080
-}
+    # Strapi administration endpoint
+    handle /admin /admin/* {
+        reverse_proxy cms-staging:1337
+    }
 
-api-preprod.example.com {
-    encode zstd gzip
-
-    reverse_proxy cms-preprod:1337
+    # Frontend - default route
+    handle {
+        reverse_proxy frontend-staging:8080
+    }
 }
 

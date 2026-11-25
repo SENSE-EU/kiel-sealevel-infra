@@ -1,21 +1,37 @@
+
 services:
   caddy:
     image: caddy:2
     container_name: myapp-caddy
     restart: unless-stopped
 
-#    environment:
-
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      - "8443:8443"
 
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - myapp_caddy_data:/data
+      - myapp_caddy_config:/config
 
     networks:
       - staging_proxy
       - preprod_proxy
+
+networks:
+  staging_proxy:
+    external: true
+    name: myapp_staging_proxy
+
+  preprod_proxy:
+    external: true
+    name: myapp_preprod_proxy
+
+volumes:
+  myapp_caddy_data:
+    external: true
+  myapp_caddy_config:
+    external: true
+
