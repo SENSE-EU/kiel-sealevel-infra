@@ -1,14 +1,15 @@
-
 services:
   caddy:
     image: caddy:2
-    container_name: myapp-caddy
+    container_name: caddy-rp
     restart: unless-stopped
+
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
 
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
       - "8443:8443"
 
     volumes:
@@ -20,18 +21,21 @@ services:
       - staging_proxy
       - preprod_proxy
 
-networks:
-  staging_proxy:
-    external: true
-    name: myapp_staging_proxy
-
-  preprod_proxy:
-    external: true
-    name: myapp_preprod_proxy
 
 volumes:
   myapp_caddy_data:
     external: true
+
   myapp_caddy_config:
     external: true
+
+
+networks:
+  staging_proxy:
+    external: true
+    name: kiel-sealevel_staging_proxy
+
+  preprod_proxy:
+    external: true
+    name: kiel-sealevel_preprod_proxy
 

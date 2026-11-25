@@ -1,52 +1,48 @@
 {
-    email alexandru.dobrescu@dreso.com
+    email {$ACME_EMAIL}
 }
 
-### PRE-PRODUCTION - HTTPS 443
-
+# PRE-PRODUCTION
 kiel-sealevel.westeurope.cloudapp.azure.com {
 
-    # Strapi API endpoint
-    handle /api /api/* {
+    @api path /api /api/*
+    handle @api {
         reverse_proxy cms-preprod:1337
     }
 
-    # Strapi uploads endpoint
-    handle /uploads /uploads/* {
+    @uploads path /uploads /uploads/*
+    handle @uploads {
         reverse_proxy cms-preprod:1337
     }
 
-    # Strapi administration endpoint
-    handle /admin /admin/* {
+    @admin path /admin /admin/*
+    handle @admin {
         reverse_proxy cms-preprod:1337
     }
 
-    # Frontend - default route
     handle {
         reverse_proxy frontend-preprod:8080
     }
 }
 
-### STAGING - HTTPS 8443
-
+# STAGING
 kiel-sealevel.westeurope.cloudapp.azure.com:8443 {
 
-    # Strapi API endpoint
-    handle /api /api/* {
+    @api path /api /api/*
+    handle @api {
         reverse_proxy cms-staging:1337
     }
 
-    # Strapi uploads endpoint
-    handle /uploads /uploads/* {
+    @uploads path /uploads /uploads/*
+    handle @uploads {
         reverse_proxy cms-staging:1337
     }
 
-    # Strapi administration endpoint
-    handle /admin /admin/* {
+    @admin path /admin /admin/*
+    handle @admin {
         reverse_proxy cms-staging:1337
     }
 
-    # Frontend - default route
     handle {
         reverse_proxy frontend-staging:8080
     }
