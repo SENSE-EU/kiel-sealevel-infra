@@ -1,4 +1,4 @@
-name: myapp
+name: kiel-sealevel
 
 networks:
   staging_proxy:

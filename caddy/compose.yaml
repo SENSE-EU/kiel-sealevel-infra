@@ -13,7 +13,7 @@ services:
       - "8443:8443"
 
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - myapp_caddy_data:/data
       - myapp_caddy_config:/config
 
