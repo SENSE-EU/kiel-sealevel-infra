@@ -1,5 +1,3 @@
-
-
 # Docker Infrastructure Setup & Deployment Documentation
 
 ## 1. Overview
@@ -9,11 +7,8 @@ The application infrastructure runs on an Azure Ubuntu VM using Docker Compose.
 The setup supports two independent environments:
 
 | Environment | Purpose |
-
 |------------|---------|
-
 | Staging | Automatically updated when changes are merged into `main` |
-
 | Pre-production | Automatically updated when a semantic version release (`vX.Y.Z`) is published |
 
 ---
@@ -21,29 +16,17 @@ The setup supports two independent environments:
 ## Technology Stack
 
 | Component | Purpose |
-
 |------------|---------|
-
 | Azure VM | Hosting infrastructure |
-
 | Ubuntu | Operating system |
-
 | Docker Engine | Container runtime |
-
 | Docker Compose | Container orchestration |
-
 | Azure Container Registry (ACR) | Docker image registry |
-
 | GitHub Actions | CI/CD pipelines |
-
 | Caddy | Reverse proxy and HTTPS |
-
 | Watchtower | Automatic container updates |
-
 | PostgreSQL | Database |
-
 | Strapi | CMS backend |
-
 | NGINX | Frontend static asset server |
 
 ---
@@ -55,43 +38,24 @@ Infrastructure configuration is maintained separately from the frontend and CMS 
 Directory structure:
 
 ```text
-
 kiel-sealevel-infra/
-
 │
-
 ├── README.md
-
 ├── .env
-
 ├── compose.yaml
-
 │
-
 ├── caddy/
-
 │   ├── Caddyfile
-
 │   └── compose.yaml
-
 │
-
 ├── cms/
-
 │   └── compose.yaml
-
 │
-
 ├── frontend/
-
 │   └── compose.yaml
-
 │
-
 └──  watchtower/
-
     └── compose.yaml
-
 ```
 
 Each component maintains its own Docker Compose configuration.
@@ -111,15 +75,10 @@ The root `compose.yaml` defines shared infrastructure resources:
 Each environment has isolated Docker networks.
 
 | Network | Purpose |
-
 |----------|---------|
-
 | staging_proxy | Caddy and staging applications |
-
 | preprod_proxy | Caddy and pre-production applications |
-
 | staging_internal | Private staging communication |
-
 | preprod_internal | Private pre-production communication |
 
 The internal networks isolate application services and databases from public access.
@@ -127,26 +86,23 @@ The internal networks isolate application services and databases from public acc
 Only containers that need external traffic should be attached to the proxy networks.
 
 ---
-
 # 4. Deployment Model
 
 All deployment commands must be executed from the repository root:
 
 ```bash
-
 cd ~/kiel-sealevel-infra
-
 ```
 
 The root directory contains the shared:
 
 ```text
-
 .env
-
 ```
 
 file that provides environment variables used by the component Compose configurations.
+
+Tt is not versioned through Git, it exists on the VM in the root of the repository.
 
 The component compose files are not intended to be executed independently from their own directories.
 
@@ -157,9 +113,7 @@ The component compose files are not intended to be executed independently from t
 Create the external networks and volumes defined by the root compose file:
 
 ```bash
-
 docker compose create
-
 ```
 
 This creates the required:
@@ -177,33 +131,25 @@ without starting application containers.
 Start Caddy:
 
 ```bash
-
 docker compose -f caddy/compose.yaml up -d
-
 ```
 
 Start CMS:
 
 ```bash
-
 docker compose -f cms/compose.yaml up -d
-
 ```
 
 Start Frontend:
 
 ```bash
-
 docker compose -f frontend/compose.yaml up -d
-
 ```
 
 Start Watchtower:
 
 ```bash
-
 docker compose -f watchtower/compose.yaml up -d
-
 ```
 
 These commands must be executed from the repository root so the shared `.env` file is available.
@@ -243,43 +189,32 @@ https://kiel-sealevel.westeurope.cloudapp.azure.com:8443
 ### Pre-production
 
 ```text
-
 https://kiel-sealevel.westeurope.cloudapp.azure.com/
-
     -> Frontend
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com/cms/admin
-
     -> Strapi Administration
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com/cms/api/*
-
     -> Strapi APIs
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com/cms/uploads/*
-
     -> Strapi Media Assets
-
 ```
 
 ### Staging
 
 ```text
-
 https://kiel-sealevel.westeurope.cloudapp.azure.com:8443/
-
     -> Frontend
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com:8443/cms/admin
-
     -> Strapi Administration
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com:8443/cms/api/*
-
     -> Strapi APIs
 
 https://kiel-sealevel.westeurope.cloudapp.azure.com:8443/cms/uploads/*
-
     -> Strapi Media Assets
 
 ```
@@ -289,7 +224,6 @@ https://kiel-sealevel.westeurope.cloudapp.azure.com:8443/cms/uploads/*
 ## Architecture Diagram
 
 ```text
-
 Internet
     |
     v
@@ -303,7 +237,6 @@ Frontend                    Strapi
                                 |
                                 v
                           PostgreSQL
-
 ```
 
 The frontend and CMS share a single hostname.
@@ -527,7 +460,6 @@ Watchtower
       |
       v
 Container Recreated
-
 ```
 
 ---
@@ -557,7 +489,6 @@ Watchtower
       |
       v
 Container Recreated
-
 ```
 
 ---
@@ -569,19 +500,12 @@ Persistent Docker volumes preserve data across container recreation.
 Expected volumes:
 
 | Volume | Purpose |
-
 |----------|---------|
-
 | myapp_caddy_data | TLS certificates |
-
 | myapp_caddy_config | Caddy state |
-
 | staging_postgres_data | Staging database |
-
 | preprod_postgres_data | Pre-production database |
-
 | staging_cms_uploads | Staging uploads |
-
 | preprod_cms_uploads | Pre-production uploads |
 
 Staging and pre-production must never share storage.
@@ -840,21 +764,13 @@ Useful when validating deployments after image updates.
 ## Common Symptoms
 
 | Symptom | Likely Cause |
-
 |----------|-------------|
-
 | HTTP 502 from Caddy | CMS container unavailable or incorrect network attachment |
-
 | Frontend HTML returned from API endpoint | Request routed to frontend instead of Strapi |
-
 | Admin loads but API returns 404 | Incorrect API route or frontend configuration |
-
 | Upload URLs return 404 | Invalid file path or missing uploaded asset |
-
 | Admin assets fail to load | Incorrect `PUBLIC_URL` or admin base URL |
-
 | TLS certificate problems | Missing or deleted Caddy volumes |
-
 | Old application version visible | Updated image not pulled or container not recreated |
 
 Always verify routing, image versions, and network attachments before modifying volume or TLS configuration.
