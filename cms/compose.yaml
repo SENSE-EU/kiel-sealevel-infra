@@ -171,15 +171,19 @@ services:
 
 volumes:
   staging_postgres_data:
+    external: true
     name: kiel-sealevel_staging_postgres_data
 
   preprod_postgres_data:
+    external: true
     name: kiel-sealevel_preprod_postgres_data
 
   staging_cms_uploads:
+    external: true
     name: kiel-sealevel_staging_cms_uploads
 
   preprod_cms_uploads:
+    external: true
     name: kiel-sealevel_preprod_cms_uploads
 
 
